@@ -1,0 +1,472 @@
+<title>Sounds of Identity</title>
+<meta name="description" content="Streets that Speak: a five-minute binaural soundscape of Lahore and London by Natalya Kirmani.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Nastaliq+Urdu:wght@500&display=swap">
+<style>
+/* Layout: one scrolling page. The soundscape itself is the hero: a waveform strip drawn the way the piece is built,
+   dense and overlapping for Lahore, spaced out for London, with the five-second transition as the seam in the middle.
+   Below it, Lahore and London sit side by side, then how it was made. */
+:root{
+  --ground:#EDEFEC;      /* pale stone */
+  --surface:#F7F8F6;
+  --ink:#1C232B;
+  --muted:#5D6670;
+  --rule:#CBD0CC;
+  --lahore:#B9781A;      /* kashi-tile ochre from the walled city */
+  --lahore-soft:#EBD9B8;
+  --london:#3D5C7A;      /* wet slate and Underground tile blue */
+  --london-soft:#CCD7E2;
+  --seam:#1C232B;
+  --display:"Gloock", "Georgia", serif;
+  --body:"Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --urdu:"Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#161A1F;--surface:#1E242A;--ink:#E8EAE6;--muted:#9AA3AC;--rule:#323A42;
+  --lahore:#E0A445;--lahore-soft:#3B3020;--london:#8FB0D1;--london-soft:#24303C;--seam:#E8EAE6;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#161A1F;--surface:#1E242A;--ink:#E8EAE6;--muted:#9AA3AC;--rule:#323A42;
+  --lahore:#E0A445;--lahore-soft:#3B3020;--london:#8FB0D1;--london-soft:#24303C;--seam:#E8EAE6;color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.7;padding-inline:clamp(16px,4vw,48px)}
+.page{max-width:70rem;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.05}
+p{margin:0}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--lahore);outline-offset:3px}
+
+/* ---------- Hero ---------- */
+.hero{padding-block:clamp(2.5rem,7vw,5rem) 2rem;display:grid;gap:1.25rem}
+.kicker{color:var(--muted);font-weight:600}
+.hero h1{font-size:clamp(3rem,10vw,7.5rem);letter-spacing:-.01em}
+.hero .lede{font-size:clamp(1.1rem,2.2vw,1.35rem);max-width:44ch;line-height:1.55}
+.hero .lede em{font-style:italic}
+
+/* ---------- Skyline drawing ---------- */
+.skyline{display:block;width:100%;height:auto;margin-bottom:-1.25rem}
+.skyline .lhr-f{fill:var(--lahore)}
+.skyline .ldn-f{fill:var(--london)}
+.skyline .ink-f{fill:var(--ink)}
+.skyline .kite-s{fill:none;stroke:var(--lahore);stroke-width:1.5}
+.skyline .face{fill:var(--ground)}
+.photo .skyline .face{fill:var(--london-soft)}
+.skyline .chain{fill:none;stroke:var(--london);stroke-width:4}
+.skyline .river{fill:none;stroke:var(--london);stroke-width:2;stroke-linecap:round;opacity:.5}
+.skyline .rain{stroke:var(--london);stroke-width:1.5;stroke-linecap:round;opacity:.45}
+
+/* ---------- Player ---------- */
+.player{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:clamp(1rem,3vw,1.75rem);display:grid;gap:1.1rem}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:1rem 1.25rem}
+.play{width:4.25rem;height:4.25rem;border-radius:50%;border:none;background:var(--ink);color:var(--ground);cursor:pointer;display:grid;place-items:center;flex:none}
+.play svg{width:1.4rem;height:1.4rem}
+.now{display:grid;gap:.1rem;min-width:0}
+.now strong{font-family:var(--display);font-weight:400;font-size:1.5rem;line-height:1.1}
+.now span{color:var(--muted);font-variant-numeric:tabular-nums}
+.phones{margin-left:auto;display:flex;align-items:center;gap:.6rem;font-weight:600;max-width:22rem;line-height:1.35}
+.phones svg{width:1.9rem;height:1.9rem;flex:none;color:var(--lahore)}
+.status{color:var(--lahore);font-size:.95rem}
+.status:empty{display:none}
+
+.strip{position:relative}
+.strip canvas{display:block;width:100%;height:clamp(90px,14vw,140px)}
+.strip input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.strip:focus-within{outline:3px solid var(--lahore);outline-offset:4px;border-radius:4px}
+.strip-labels{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:start;font-size:.92rem}
+.strip-labels .lhr{color:var(--lahore);font-weight:700}
+.strip-labels .ldn{color:var(--london);font-weight:700;text-align:right}
+.strip-labels small{display:block;color:var(--muted);font-weight:400;font-size:.88rem}
+.strip-labels .mid{text-align:center;color:var(--muted);font-size:.88rem;max-width:12rem;line-height:1.35}
+
+/* ---------- Transition statement ---------- */
+.between{padding-block:3.5rem 1rem;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:clamp(1rem,4vw,3rem);align-items:start}
+.between h2{font-size:clamp(1.8rem,4vw,2.6rem)}
+.between p{max-width:58ch}
+.between p + p{margin-top:1rem}
+
+/* ---------- Cities ---------- */
+.cities{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,3.5rem);padding-block:3rem}
+.city{min-width:0;display:grid;gap:1.1rem;align-content:start}
+.city header{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;border-bottom:3px solid;padding-bottom:.5rem}
+.city.lhr header{border-color:var(--lahore)}
+.city.ldn header{border-color:var(--london)}
+.city h2{font-size:clamp(2.4rem,6vw,3.6rem)}
+.city .ur{font-family:var(--urdu);font-size:1.6rem;line-height:1.9;color:var(--lahore)}
+.city .role{color:var(--muted);font-weight:600;font-size:.95rem}
+.city p{max-width:60ch}
+
+.photo{position:relative;margin:0;border-radius:10px;overflow:hidden;aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;text-align:center;padding:1rem}
+.lhr .photo{background:var(--lahore-soft)}
+.ldn .photo{background:var(--london-soft)}
+.photo{align-content:end;padding:0}
+.photo .skyline{position:absolute;left:0;right:0;bottom:0;margin:0;opacity:.85}
+.photo span{position:absolute;top:.75rem;left:.75rem;right:.75rem;color:var(--muted);font-size:.85rem;text-align:left}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo figcaption{position:absolute;left:0;right:0;bottom:0;padding:.5rem .75rem;font-size:.85rem;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));text-align:left}
+.photo:not(.has-img) figcaption{display:none}
+
+.keynotes{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.keynotes li{display:grid;grid-template-columns:auto 1fr;gap:.75rem;align-items:baseline}
+.keynotes li::before{content:"";width:.7rem;height:.7rem;border-radius:50%;transform:translateY(.05rem)}
+.lhr .keynotes li::before{background:var(--lahore)}
+.ldn .keynotes li::before{background:var(--london)}
+.keynotes b{font-weight:700}
+.where{color:var(--muted);font-size:.92rem;font-style:italic}
+
+/* ---------- About ---------- */
+.about{border-top:1px solid var(--rule);padding-block:3rem;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:clamp(1rem,4vw,3rem)}
+.about h2{font-size:clamp(1.8rem,4vw,2.6rem)}
+.about-body{display:grid;gap:2rem;min-width:0}
+.about-body h3{font-family:var(--body);font-weight:700;font-size:1.05rem;margin-bottom:.4rem}
+.about-body p{max-width:60ch}
+.made{list-style:none;margin:0;padding:0;display:grid;gap:.9rem}
+.made li{display:grid;grid-template-columns:7.5rem 1fr;gap:1rem;border-top:1px solid var(--rule);padding-top:.9rem}
+.made li span:first-child{font-weight:700}
+.made li:first-child{border-top:none;padding-top:0}
+.who{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.who div{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:1rem;font-size:.95rem;line-height:1.5}
+.who b{display:block;margin-bottom:.25rem}
+
+footer{border-top:3px solid var(--ink);padding-block:1.5rem 3rem;font-size:.9rem;color:var(--muted);display:grid;gap:1rem}
+footer .credit{color:var(--ink);font-weight:600}
+footer ol{margin:0;padding-left:1.2rem;display:grid;gap:.25rem}
+
+@media (max-width:760px){
+  .between,.cities,.about{grid-template-columns:1fr}
+  .who{grid-template-columns:1fr}
+  .phones{margin-left:0}
+  .strip-labels{grid-template-columns:1fr 1fr}
+  .strip-labels .mid{grid-column:1 / -1;grid-row:2;max-width:none}
+  .made li{grid-template-columns:1fr;gap:.2rem}
+}
+</style>
+
+<div class="page">
+
+  <section class="hero" aria-labelledby="site-title">
+    <p class="kicker">A binaural soundscape of Lahore and London</p>
+    <h1 id="site-title">Sounds of Identity</h1>
+    <p class="lede">Listen to <em>Streets that Speak</em>, five minutes of sound I recorded in the two cities that have shaped me. It moves through a day in Lahore, crosses over, and moves through a day in London.</p>
+
+    <svg class="skyline" data-skyline="both" viewBox="0 -6 1200 226" role="img" aria-label="Drawing of Lahore and London side by side: the Badshahi Mosque, Minar-e-Pakistan and a kite on the left, Big Ben, the Houses of Parliament and Tower Bridge in the rain on the right"></svg>
+
+    <div class="player" aria-label="Soundscape player">
+      <div class="controls">
+        <button class="play" id="play" aria-label="Play Streets that Speak"></button>
+        <div class="now">
+          <strong>Streets that Speak</strong>
+          <span id="time">0:00 / 5:00</span>
+        </div>
+        <p class="phones">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          Please use headphones. The sounds move around you, and speakers lose that.
+        </p>
+      </div>
+      <p class="status" id="status" role="status"></p>
+
+      <div class="strip">
+        <canvas id="wave" aria-hidden="true"></canvas>
+        <input type="range" id="seek" min="0" max="300" step="1" value="0" aria-label="Position in the soundscape">
+      </div>
+      <div class="strip-labels">
+        <div class="lhr">Lahore<small>morning, midday, night</small></div>
+        <div class="mid">The five-second crossing: the azaan fades as the Underground rises</div>
+        <div class="ldn">London<small>morning, midday, night</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="between" aria-labelledby="between-title">
+    <h2 id="between-title">Why sound?</h2>
+    <div>
+      <p>Some sounds are so tied to a place that hearing them takes me straight back there. I have always recorded my travels with photographs and videos, but they never kept what a city sounds like. The azaan echoing across rooftops in Lahore, the chime of the London Underground doors: these hold a meaning a photograph can't.</p>
+      <p>So this project asks one question: what is it about sound that builds belonging? There is no narration. The sounds tell the story, and the moment between the two cities is the centre of the piece. London fades back towards that crossing at the end, so neither city has the final word.</p>
+    </div>
+  </section>
+
+  <div class="cities">
+    <article class="city lhr" aria-labelledby="lahore-title">
+      <header>
+        <h2 id="lahore-title">Lahore</h2>
+        <span class="ur" lang="ur">لاہور</span>
+      </header>
+      <p class="role">The city I grew up in</p>
+      <figure class="photo">
+        <!-- Put your photo in a folder called photos, named lahore.jpg -->
+        <img src="photos/lahore.jpg" alt="My photograph of Lahore" onload="this.parentElement.classList.add('has-img')" onerror="this.remove()">
+        <svg class="skyline" data-skyline="lahore" viewBox="0 -6 600 226" aria-hidden="true"></svg>
+        <span>Add your photo: photos/lahore.jpg</span>
+        <figcaption>Liberty Market, Lahore</figcaption>
+      </figure>
+      <p>For me, Lahore sounds like familiarity and childhood: the loud chatter of people, busy streets, and the azaan rising over everything five times a day. In the soundscape, Lahore's sounds sit close together and overlap. The azaan, the vendors' calls and the traffic are stacked on top of each other, because that is how the city feels to me day to day: warm, spontaneous and close.</p>
+      <ul class="keynotes" aria-label="Keynote sounds of Lahore">
+        <li><span><b>Azaan</b>, the call to prayer at dawn</span></li>
+        <li><span><b>Street vendors</b> calling out their goods</span></li>
+        <li><span><b>Rickshaws and motorbikes</b> in the traffic</span></li>
+        <li><span><b>Dhol</b>, the drum of Punjabi celebrations</span></li>
+      </ul>
+      <p class="where">Recorded at Liberty Market and in the inner city, September 2026.</p>
+    </article>
+
+    <article class="city ldn" aria-labelledby="london-title">
+      <header>
+        <h2 id="london-title">London</h2>
+      </header>
+      <p class="role">A second home, discovered over many visits</p>
+      <figure class="photo">
+        <!-- Put your photo in a folder called photos, named london.jpg -->
+        <img src="photos/london.jpg" alt="My photograph of London" onload="this.parentElement.classList.add('has-img')" onerror="this.remove()">
+        <svg class="skyline" data-skyline="london" viewBox="600 -6 600 226" aria-hidden="true"></svg>
+        <span>Add your photo: photos/london.jpg</span>
+        <figcaption>St Paul's, London</figcaption>
+      </figure>
+      <p>London's crowded streets, full of street performers, musicians, transport announcements and overlapping conversations, made me curious about the world outside. In the soundscape, London's sounds are given more space. The Tube chime and the station announcement stand apart from the sirens and the street chatter, reflecting the more structured rhythm I feel there.</p>
+      <ul class="keynotes" aria-label="Keynote sounds of London">
+        <li><span><b>Tube chimes</b> and station announcements</span></li>
+        <li><span><b>Street performers</b> and buskers</span></li>
+        <li><span><b>Pedestrian crossings</b> and traffic signals</span></li>
+        <li><span><b>Sirens</b> moving through the streets</span></li>
+      </ul>
+      <p class="where">Recorded at St Paul's station and [other locations], [month] 2026.</p>
+    </article>
+  </div>
+
+  <section class="about" aria-labelledby="about-title">
+    <h2 id="about-title">How I made it</h2>
+    <div class="about-body">
+      <div>
+        <h3>What I set out to learn</h3>
+        <p>I wanted to understand how the everyday sounds of a city create a sense of place and identity, and to learn how to record, edit and compose 3D sound so a listener who has never been to Lahore or London can feel the contrast between them, and what it is like to be in between.</p>
+      </div>
+
+      <ul class="made" aria-label="How the soundscape was made">
+        <li><span>Recording</span><span>Every sound was recorded by me in the field, in stereo, on a Zoom recorder with a windshield. A test in Week 2 showed that mono sounded flat, "inside my head", so I never used it.</span></li>
+        <li><span>Choosing sounds</span><span>I used R. Murray Schafer's idea of keynote sounds and checked each one against research. The dhol was added after research. Big Ben was removed because it is mostly heard by tourists, not in everyday London life.</span></li>
+        <li><span>Layering</span><span>Each part has at least three layers: a background hum, a middle layer like traffic or footsteps, and a foreground voice or call.</span></li>
+        <li><span>Moving sound</span><span>I panned sounds around the listener in Audacity and GarageBand, and used volume to make them feel near or far.</span></li>
+        <li><span>Respect</span><span>Private conversations are blurred, and the azaan is never mixed with unsuitable sound.</span></li>
+      </ul>
+
+      <div>
+        <h3>Who it's for</h3>
+        <div class="who">
+          <div><b>People living across cultures</b>Diaspora communities, expats and students who feel the pull of two homes.</div>
+          <div><b>Young people who travel</b>Anyone who wants to record their journeys beyond photographs.</div>
+          <div><b>People curious about places</b>Researchers interested in how cities shape who we are.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="credit">Streets that Speak, a soundscape by Natalya Kirmani. MYP Personal Project, 2026. All recordings and photographs are my own.</p>
+    <div>
+      <p>Sources that shaped this project:</p>
+      <ol>
+        <li>R. Murray Schafer, <i>The Soundscape: Our Sonic Environment and the Tuning of the World</i> (1977).</li>
+        <li>Barry Truax, <i>Acoustic Communication</i>, 2nd ed. (2001).</li>
+        <li>Naveeda Khan, "The Acoustics of Muslim Striving: Loudspeaker Use in Ritual Practice in Pakistan", <i>Comparative Studies in Society and History</i> 53(3) (2011).</li>
+        <li>Ian Rawes, <a href="https://www.soundsurvey.org.uk" target="_blank" rel="noopener">The London Sound Survey</a>.</li>
+        <li>Organology, <a href="https://organology.net/instrument/dhol/" target="_blank" rel="noopener">"Dhol"</a>.</li>
+      </ol>
+    </div>
+  </footer>
+</div>
+
+<!-- The soundscape file: put streets-that-speak.mp3 in the same folder as this page -->
+<audio id="audio" src="streets-that-speak.mp3" preload="metadata"></audio>
+
+<script>
+// ---------- Skyline drawing: Lahore on the left, London on the right ----------
+(() => {
+  const G = 198; // ground line
+  const onion = (cx, y, w, h) =>
+    `<path d="M${cx-w/2},${y} C${cx-w*0.78},${y-h*0.38} ${cx-w*0.18},${y-h*0.68} ${cx},${y-h} C${cx+w*0.18},${y-h*0.68} ${cx+w*0.78},${y-h*0.38} ${cx+w/2},${y} Z"/>` +
+    `<rect x="${cx-0.8}" y="${y-h-7}" width="1.6" height="8"/>`;
+  const minaret = (x, top, w) =>
+    `<rect x="${x}" y="${top}" width="${w}" height="${G-top}"/>` +
+    `<rect x="${x-3}" y="${top+30}" width="${w+6}" height="3"/>` +
+    `<rect x="${x-3}" y="${top+70}" width="${w+6}" height="3"/>` +
+    `<rect x="${x-3}" y="${top-3}" width="${w+6}" height="4"/>` + onion(x+w/2, top-3, w*1.7, w*1.6);
+
+  // Lahore: rooftops with water tanks, Badshahi Mosque, Minar-e-Pakistan, a kite
+  const roofs = [[0,44,46],[44,40,62],[84,52,38],[136,30,54],[330,42,48],[372,36,66],[408,30,40],[500,40,52],[540,40,36]];
+  let lhr = roofs.map(([x,w,h]) => `<rect x="${x}" y="${G-h}" width="${w-2}" height="${h}"/>`).join('');
+  lhr += [[52,62],[95,38],[380,66],[512,52]].map(([x,h]) => `<rect x="${x}" y="${G-h-9}" width="12" height="9" rx="2"/>`).join('');
+  lhr += `<rect x="178" y="150" width="148" height="${G-150}"/><rect x="232" y="128" width="40" height="${G-128}"/>`;
+  lhr += onion(252, 128, 52, 54) + onion(204, 150, 34, 38) + onion(300, 150, 34, 38);
+  lhr += minaret(164, 74, 9) + minaret(331, 74, 9);
+  lhr += `<path d="M444,${G} L455,172 L464,168 L467,58 L475,58 L478,168 L487,172 L498,${G} Z"/>` + onion(471, 58, 12, 16);
+  const kite = `<path d="M92,30 L104,46 L92,64 L80,46 Z"/><path class="kite-s" d="M92,64 C100,90 84,110 112,140"/>`;
+
+  // London: terraces with chimneys, St Paul's, the Shard, the Gherkin, rain
+  // London: Big Ben and the Houses of Parliament, terraces, Tower Bridge over the river, rain
+  const terr = [[612,40,40],[652,40,48],[812,40,44],[1158,42,46]];
+  let ldn = terr.map(([x,w,h]) => `<rect x="${x}" y="${G-h}" width="${w-2}" height="${h}"/><rect x="${x+w-14}" y="${G-h-10}" width="7" height="10"/>`).join('');
+  // Houses of Parliament: long low hall with small pinnacles
+  ldn += `<rect x="694" y="150" width="114" height="${G-150}"/>`;
+  for (let x = 698; x <= 802; x += 13) ldn += `<path d="M${x},150 L${x+3},140 L${x+6},150 Z"/>`;
+  // Big Ben (Elizabeth Tower)
+  ldn += `<rect x="742" y="64" width="26" height="${G-64}"/><rect x="738" y="60" width="34" height="6"/>`;
+  ldn += `<rect x="745" y="40" width="20" height="20"/><path d="M742,42 L755,6 L768,42 Z"/><rect x="754.2" y="-2" width="1.6" height="10"/>`;
+  ldn += `<circle class="face" cx="755" cy="80" r="9"/><rect class="face" x="754.2" y="73" width="1.6" height="8"/><rect class="face" x="755" y="79.2" width="6" height="1.6"/>`;
+  // Tower Bridge: two gothic towers, high walkways, deck and suspension chains
+  const tower = x => `<rect x="${x}" y="70" width="30" height="${G-70}"/><path d="M${x-2},72 L${x+15},40 L${x+32},72 Z"/>` +
+    `<path d="M${x-3},74 L${x+1},58 L${x+5},74 Z"/><path d="M${x+25},74 L${x+29},58 L${x+33},74 Z"/>`;
+  ldn += tower(920) + tower(1070);
+  ldn += `<rect x="950" y="80" width="120" height="6"/><rect x="950" y="92" width="120" height="4"/>`;
+  ldn += `<rect x="858" y="158" width="300" height="7"/>`;
+  ldn += `<path class="chain" d="M858,150 Q890,152 920,96"/><path class="chain" d="M1100,96 Q1130,152 1158,150"/>`;
+  // River under the bridge
+  ldn += `<path class="river" d="M866,184 h40 M960,188 h60 M1050,184 h50 M1110,190 h36"/>`;
+  let rain = '';
+  for (let i = 0; i < 26; i++) {
+    const x = 640 + ((i * 97) % 560), y = 12 + ((i * 53) % 70);
+    rain += `<line class="rain" x1="${x}" y1="${y}" x2="${x-5}" y2="${y+12}"/>`;
+  }
+
+  const seam = `<rect class="ink-f" x="599" y="40" width="2" height="${G-40}"/>`;
+  const ground = `<rect class="ink-f" x="0" y="${G}" width="1200" height="2"/>`;
+  const parts = {
+    lahore: `<g class="lhr-f">${lhr}${kite}</g>`,
+    london: `<g class="ldn-f">${ldn}</g>${rain}`
+  };
+  document.querySelectorAll('[data-skyline]').forEach(svg => {
+    const which = svg.dataset.skyline;
+    svg.innerHTML = which === 'both'
+      ? parts.lahore + parts.london + seam + ground
+      : parts[which] + ground;
+  });
+})();
+
+(() => {
+  const audio = document.getElementById('audio');
+  const play = document.getElementById('play');
+  const seek = document.getElementById('seek');
+  const timeEl = document.getElementById('time');
+  const statusEl = document.getElementById('status');
+  const canvas = document.getElementById('wave');
+  const ctx = canvas.getContext('2d');
+
+  // Shape of the piece, as fractions of the total length.
+  // Lahore and London each take roughly half; the transition is 5 seconds of 300.
+  const TOTAL_GUESS = 300;
+  const LAHORE_END = 147.5 / 300, TRANS_END = 152.5 / 300;
+
+  const icons = {
+    play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l14 8-14 8z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'
+  };
+  play.innerHTML = icons.play;
+
+  const fmt = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const total = () => (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : TOTAL_GUESS;
+
+  // Seeded random so the drawing is the same on every visit
+  let seed = 7;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+  // Build bar heights: Lahore dense and overlapping, London spaced pulses, a crossfade in between
+  const BARS = 260;
+  const bars = [];
+  for (let i = 0; i < BARS; i++) {
+    const t = i / BARS;
+    let h, city;
+    if (t < LAHORE_END) {
+      city = 'lahore';
+      h = 0.45 + rnd() * 0.45 + Math.sin(i * 0.9) * 0.08;
+    } else if (t < TRANS_END) {
+      city = 'seam';
+      h = 0.25;
+    } else {
+      city = 'london';
+      const k = i % 9;
+      h = (k === 0 || k === 1) ? 0.6 + rnd() * 0.35 : 0.12 + rnd() * 0.12;
+    }
+    bars.push({ h: Math.min(h, 1), city });
+  }
+  // Soften the edges into the seam: azaan fading out, Underground rising
+  const seamStart = Math.floor(LAHORE_END * BARS), seamEnd = Math.ceil(TRANS_END * BARS);
+  for (let j = 1; j <= 10; j++) {
+    if (bars[seamStart - j]) bars[seamStart - j].h *= 0.35 + j * 0.065;
+    if (bars[seamEnd + j - 1]) bars[seamEnd + j - 1].h = Math.max(bars[seamEnd + j - 1].h, 0.12 + j * 0.05);
+  }
+
+  function draw() {
+    const css = getComputedStyle(document.documentElement);
+    const col = { lahore: css.getPropertyValue('--lahore').trim(), london: css.getPropertyValue('--london').trim(), seam: css.getPropertyValue('--seam').trim() };
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const progress = audio.currentTime / total();
+    const step = w / BARS;
+    const bw = Math.max(1, step * 0.62);
+    const mid = h / 2;
+
+    bars.forEach((b, i) => {
+      const x = i * step;
+      const played = (i + 0.5) / BARS <= progress;
+      ctx.globalAlpha = played ? 1 : 0.38;
+      ctx.fillStyle = b.city === 'london' ? col.london : col.lahore;
+      if (b.city === 'seam') ctx.fillStyle = col.seam;
+      const bh = Math.max(2, b.h * (h - 8));
+      ctx.fillRect(x, mid - bh / 2, bw, bh);
+    });
+
+    // The seam: a thin line marking the crossing
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = col.seam;
+    const sx = ((LAHORE_END + TRANS_END) / 2) * w;
+    ctx.fillRect(sx - 1, 0, 2, h);
+
+    // Playhead
+    if (audio.currentTime > 0) {
+      ctx.fillRect(progress * w - 1.5, 0, 3, h);
+    }
+  }
+
+  function update() {
+    timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(total());
+    seek.max = Math.round(total());
+    seek.value = Math.round(audio.currentTime);
+    draw();
+  }
+
+  play.addEventListener('click', () => {
+    if (audio.paused) {
+      const p = audio.play();
+      if (p && p.catch) p.catch(() => {});
+    } else {
+      audio.pause();
+    }
+  });
+  audio.addEventListener('play', () => { play.innerHTML = icons.pause; play.setAttribute('aria-label', 'Pause Streets that Speak'); statusEl.textContent = ''; });
+  audio.addEventListener('pause', () => { play.innerHTML = icons.play; play.setAttribute('aria-label', 'Play Streets that Speak'); });
+  audio.addEventListener('ended', () => { play.innerHTML = icons.play; });
+  audio.addEventListener('timeupdate', update);
+  audio.addEventListener('loadedmetadata', update);
+  audio.addEventListener('error', () => {
+    statusEl.textContent = 'The soundscape file isn’t here yet. Add streets-that-speak.mp3 to the same folder as this page.';
+    play.innerHTML = icons.play;
+  });
+
+  seek.addEventListener('input', () => {
+    if (isFinite(audio.duration)) audio.currentTime = Number(seek.value);
+    update();
+  });
+
+  window.addEventListener('resize', draw);
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mq.addEventListener) mq.addEventListener('change', draw);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  update();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+})();
+</script>
